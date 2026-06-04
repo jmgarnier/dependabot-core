@@ -26,11 +26,13 @@ module Dependabot
       )
       NAMED_QUALIFIERS_HIERARCHY = T.let(
         {
+          "dev" => 0,
           "a" => 1, "alpha" => 1,
-          "b" => 2, "beta"      => 2,
+          "experimental" => 1, "unstable" => 1,
+          "b" => 2, "beta" => 2,
           "m" => 3, "milestone" => 3,
-          "rc" => 4, "cr" => 4, "pr" => 4, "pre" => 4,
-          "snapshot" => 5, "dev" => 5,
+          "rc" => 4, "cr" => 4, "pr" => 4, "pre" => 4, "preview" => 4,
+          "snapshot" => 5,
           "ga" => 6, "" => 6, "final" => 6,
           "sp" => 7
         }.freeze,

@@ -813,6 +813,36 @@ RSpec.describe Dependabot::Maven::Shared::SharedVersionFinder do
 
       it { is_expected.to be false }
     end
+
+    context "when the dependency has no version but requirements reference a prerelease" do
+      let(:dependency_version) { nil }
+      let(:dependency_requirements) do
+        [{
+          file: "pom.xml",
+          requirement: "1.0.0-alpha1",
+          groups: [],
+          source: nil,
+          metadata: { packaging_type: "jar" }
+        }]
+      end
+
+      it { is_expected.to be true }
+    end
+
+    context "when the dependency is stable but requirements reference a prerelease" do
+      let(:dependency_version) { "1.0.0" }
+      let(:dependency_requirements) do
+        [{
+          file: "pom.xml",
+          requirement: "1.0.0-beta1",
+          groups: [],
+          source: nil,
+          metadata: { packaging_type: "jar" }
+        }]
+      end
+
+      it { is_expected.to be true }
+    end
   end
 
   describe "#wants_date_based_version?" do
@@ -848,6 +878,58 @@ RSpec.describe Dependabot::Maven::Shared::SharedVersionFinder do
 
     it "returns the dependency's version class" do
       expect(resolved_version_class).to eq(Dependabot::Maven::Version)
+    end
+  end
+
+  describe "#pre_release?" do
+    subject { finder.send(:pre_release?, version_string) }
+
+    context "with numbered DEV qualifier" do
+      let(:version_string) { "1.0.0-DEV5" }
+
+      it { is_expected.to be true }
+    end
+
+    context "with numbered PREVIEW qualifier" do
+      let(:version_string) { "1.0.0-PREVIEW1" }
+
+      it { is_expected.to be true }
+    end
+
+    context "with numbered EXPERIMENTAL qualifier" do
+      let(:version_string) { "1.0.0-EXPERIMENTAL2" }
+
+      it { is_expected.to be true }
+    end
+
+    context "with numbered UNSTABLE qualifier" do
+      let(:version_string) { "1.0.0-UNSTABLE1" }
+
+      it { is_expected.to be true }
+    end
+
+    context "with numbered PRERELEASE qualifier" do
+      let(:version_string) { "1.0.0-PRERELEASE3" }
+
+      it { is_expected.to be true }
+    end
+
+    context "with dot-separated number" do
+      let(:version_string) { "1.0.0-DEV.5" }
+
+      it { is_expected.to be true }
+    end
+
+    context "with stable version" do
+      let(:version_string) { "1.0.0" }
+
+      it { is_expected.to be false }
+    end
+
+    context "with RELEASE qualifier" do
+      let(:version_string) { "1.0.0.RELEASE" }
+
+      it { is_expected.to be false }
     end
   end
 end
